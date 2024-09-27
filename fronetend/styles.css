@@ -1,0 +1,26 @@
+body {
+    background-color: #f7f7f7;
+}
+
+.navbar {
+    background-color: #005EB8; /* KPMG blue */
+    color: white;
+}
+
+.navbar-brand {
+    color: white !important;
+}
+
+.btn-primary {
+    background-color: #005EB8; /* KPMG blue */
+    border-color: #005EB8;
+}
+
+.btn-primary:hover {
+    background-color: #004A8D; /* Darker shade */
+    border-color: #004A8D;
+}
+
+.list-group-item {
+    cursor: pointer;
+}

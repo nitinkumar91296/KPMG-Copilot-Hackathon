@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposal Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-image: url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDF8fGJhY2tncm91bmR8ZW58MHx8fHwxNjY3OTU2NDEy&ixlib=rb-1.2.1&q=80&w=1080');
+            background-size: cover;
+            color: #333;
+            flex: 1;
+        }
+
+        .navbar {
+            background-color: #002D72; /* KPMG Blue */
+        }
+
+        .navbar-brand {
+            color: #fff;
+        }
+
+        h1, h2 {
+            color: #002D72; /* KPMG Blue */
+        }
+
+        .available-proposals, .subtasks-title {
+            color: #fff; /* Change to white for visibility */
+        }
+
+        .card {
+            margin: 10px 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #002D72; /* KPMG Blue */
+            color: #fff;
+            position: relative;
+            margin-top: auto; /* Stick to bottom */
+        }
+
+        .btn-primary {
+            background-color: #0056b3; /* Darker blue for buttons */
+            border-color: #0056b3;
+            padding: 10px 20px; /* Increased padding */
+            font-size: 16px; /* Increased font size */
+        }
+
+        .btn-primary:hover {
+            background-color: #003d80; /* Even darker on hover */
+            border-color: #003d80;
+        }
+
+        /* Added margin for buttons */
+        .btn {
+            margin-top: 10px; /* Adjust margin as needed */
+        }
+
+        /* Added margin between subtasks */
+        .subtask-item {
+            margin-bottom: 15px; /* Space between subtasks */
+            background-color: rgba(255, 255, 255, 0.8); /* Light background for visibility */
+            padding: 10px; /* Padding for subtasks */
+            border-radius: 5px; /* Rounded corners */
+        }
+
+        /* Style for the back button */
+        .back-button {
+            margin-top: 20px; /* Space above the button */
+            background-color: #007bff; /* Button color */
+            color: white; /* Button text color */
+            border: none; /* No border */
+            padding: 10px 20px; /* Increased padding */
+            font-size: 16px; /* Increased font size */
+        }
+
+        .back-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#">
+            <img src="D:\go-workspace\kpmg-hackathon\fronetend\images\kpmg-logo.jpeg" alt="KPMG Logo" style="height: 60px;">
+            Proposal Management Portal
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="login-section" class="col-md-6 mx-auto card p-4 shadow">
+            <h2>Login</h2>
+            <div class="form-group">
+                <input type="email" class="form-control" id="login-email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="login-password" placeholder="Password" required>
+            </div>
+            <button class="btn btn-primary" onclick="login()">Login</button>
+            <button class="btn btn-secondary" onclick="showSignup()">Signup</button>
+        </div>
+
+        <div id="signup-section" class="col-md-6 mx-auto card p-4 shadow" style="display: none;">
+            <h2>Signup</h2>
+            <div class="form-group">
+                <input type="text" class="form-control" id="signup-name" placeholder="Name" required>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="signup-designation" placeholder="Designation" required>
+            </div>
+            <div class="form-group">
+                <input type="number" class="form-control" id="signup-experience" placeholder="Experience (in years)" required>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="signup-skills" placeholder="Skills (comma-separated)" required>
+            </div>
+            <div class="form-group">
+                <input type="email" class="form-control" id="signup-email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="signup-password" placeholder="Password" required>
+            </div>
+            <button class="btn btn-primary" onclick="signup()">Signup</button>
+            <button class="btn btn-secondary" onclick="showLogin()">Back to Login</button>
+        </div>
+
+        <div id="home-section" style="display: none;">
+            <h2 class="available-proposals">Available Proposals</h2>
+            <div id="proposals-list" class="list-group"></div>
+        </div>
+
+        <div id="subtasks-section" class="mt-4" style="display: none;">
+            <h3 class="subtasks-title">Subtasks for <span id="proposal-title"></span></h3>
+            <div id="subtasks-list" class="list-group"></div>
+            <button class="back-button" onclick="goBack()">Back to Proposals</button>
+        </div>
+    </div>
+
+    <!-- Submission Modal -->
+    <div class="modal fade" id="submissionModal" tabindex="-1" aria-labelledby="submissionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="submissionModalLabel">Submit Subtask</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="submission-form">
+                        <input type="hidden" id="subtask-id" value="">
+                        <input type="hidden" id="user-id" value="">
+                        <div class="mb-3">
+                            <label for="file-upload" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="file-upload" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitSubmission()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Proposal Management Portal. All rights reserved.</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html>
