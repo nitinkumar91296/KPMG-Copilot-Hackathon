@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Proposal Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #002D72;
+        }
+
+        .navbar-brand, .navbar-nav .nav-link {
+            color: white !important;
+        }
+
+        .card {
+            border-radius: 10px;
+        }
+
+        .btn-primary {
+            background-color: #0056b3;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #003d80;
+        }
+
+        .footer {
+            background-color: #002D72;
+            color: white;
+            padding: 10px 0;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="#">Proposal Management Portal</a>
+    </nav>
+
+    <div class="container d-flex flex-grow-1 justify-content-center align-items-center">
+        <div class="card p-4 shadow col-md-6 mt-4">
+            <h2 class="text-center mb-4">Login</h2>
+            <div class="form-group">
+                <input type="email" class="form-control" id="login-email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="login-password" placeholder="Password" required>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="login()">Login</button>
+            <button class="btn btn-outline-secondary btn-block mt-2" onclick="window.location.href='signup.html'">Signup</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Proposal Management Portal</p>
+    </footer>
+
+    <script>
+       function login() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    fetch('http://localhost:8080/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Login Response:', data); // Log the entire response
+
+        if (data.message === "Login successful") {
+            let userId = data.user_id; // Assuming data contains user_id
+            console.log('User ID:', userId); // Log user ID before setting it
+            sessionStorage.setItem('userId', userId); // Store userId in session storage
+            console.log('User ID stored in session storage:', sessionStorage.getItem('userId')); // Confirm it's set
+            window.location.href = 'home.html'; // Redirect to home page
+        } else {
+            alert('Login failed: ' + (data.error || 'Invalid credentials'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Login failed: ' + error.message);
+    });
+}
+    </script>
+
+</body>
+</html>

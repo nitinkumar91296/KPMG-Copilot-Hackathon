@@ -209,3 +209,134 @@ func ProposalsWithApprovedSubtasks(userID string) ([]models.ProposalReport, erro
 
 	return proposals, nil
 }
+
+func GetNotifications(userID string) ([]string, error) {
+	notifications := []string{}
+
+	// Query for new proposals
+	queryNewProposals := `SELECT title FROM proposals WHERE created_at > NOW() - INTERVAL 1 DAY`
+	rows, err := db.Query(queryNewProposals)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var title string
+		if err := rows.Scan(&title); err != nil {
+			return nil, err
+		}
+		notifications = append(notifications, fmt.Sprintf("New Proposal Submitted: %s", title))
+	}
+
+	// Query for new subtasks
+	queryNewSubtasks := `SELECT topic_name FROM subtasks WHERE created_at > NOW() - INTERVAL 1 DAY`
+	rows, err = db.Query(queryNewSubtasks)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var topicName string
+		if err := rows.Scan(&topicName); err != nil {
+			return nil, err
+		}
+		notifications = append(notifications, fmt.Sprintf("New Subtask Created: %s", topicName))
+	}
+
+	// Query for reviewed subtasks
+	queryReviewedSubtasks := `SELECT subtask_id FROM submissions WHERE user_id = ? AND review_status IN ('approved', 'rejected')`
+	rows, err = db.Query(queryReviewedSubtasks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var subtaskId string
+		if err := rows.Scan(&subtaskId); err != nil {
+			return nil, err
+		}
+
+		// Query for reviewed subtasks
+		queryGetSubtaskName := `SELECT topic_name FROM subtasks WHERE id = ?`
+		rows, err = db.Query(queryGetSubtaskName, subtaskId)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var topicName string
+			if err := rows.Scan(&topicName); err != nil {
+				return nil, err
+			}
+			notifications = append(notifications, fmt.Sprintf("Subtask Reviewed: %s", topicName))
+		}
+	}
+
+	return notifications, nil
+}
+
+func GetReviewSubmissionsList(userId string) ([]models.SubmissionDetails, error) {
+	log.Print(userId)
+	query := `
+        SELECT 
+			s.id AS submission_id,
+			s.user_id,
+			u.name AS user_name,
+			s.subtask_id,
+			st.topic_name AS subtask_topic,
+			p.id AS proposal_id,
+			p.title AS proposal_title,
+			p.coordinator_id,
+			cu.name AS coordinator_name,
+			s.file_path,
+			s.submission_date,
+			s.review_status
+		FROM 
+			submissions s
+		JOIN 
+			subtasks st ON s.subtask_id = st.id
+		JOIN 
+			proposals p ON st.proposal_id = p.id
+		JOIN 
+			users u ON s.user_id = u.id
+		JOIN 
+			users cu ON p.coordinator_id = cu.id
+		WHERE 
+			p.coordinator_id = ?
+		ORDER BY 
+			s.submission_date DESC;
+    `
+
+	rows, err := db.Query(query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var submissions []models.SubmissionDetails
+	for rows.Next() {
+		var submission models.SubmissionDetails
+		if err := rows.Scan(
+			&submission.SubmissionID,
+			&submission.UserID,
+			&submission.UserName,
+			&submission.SubtaskID,
+			&submission.SubtaskTopic,
+			&submission.ProposalID,
+			&submission.ProposalTitle,
+			&submission.CoordinatorID,
+			&submission.CoordinatorName,
+			&submission.FilePath,
+			&submission.SubmissionDate,
+			&submission.ReviewStatus,
+		); err != nil {
+			return nil, err
+		}
+		submissions = append(submissions, submission)
+	}
+	return submissions, nil
+}

@@ -75,3 +75,28 @@ type ProposalReport struct {
 	Deadline         string          `json:"deadline"`
 	ApprovedSubtasks []SubtaskReport `json:"approved_subtasks"`
 }
+
+type Notification struct {
+	ID         uint      `json:"id"`
+	UserID     uint      `json:"user_id"`
+	ProposalID uint      `json:"proposal_id,omitempty"`
+	SubtaskID  uint      `json:"subtask_id,omitempty"`
+	Message    string    `json:"message"`
+	Status     string    `json:"status"`
+	CreatedAt  time.Time `json:"created_at"`
+}
+ 
+type SubmissionDetails struct {
+    SubmissionID   int    `json:"submission_id"`
+    UserID         int    `json:"user_id"`
+    UserName       string `json:"user_name"`
+    SubtaskID      int    `json:"subtask_id"`
+    SubtaskTopic   string `json:"subtask_topic"`
+    ProposalID     int    `json:"proposal_id"`
+    ProposalTitle  string `json:"proposal_title"`
+    CoordinatorID  int    `json:"coordinator_id"`
+    CoordinatorName string `json:"coordinator_name"`
+    FilePath       string `json:"file_path"`
+    SubmissionDate string `json:"submission_date"`
+    ReviewStatus   string `json:"review_status"`
+}

@@ -204,3 +204,28 @@ func GetProposalsWithApprovedSubtasks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, proposals)
 }
+
+func GetNotifications(c *gin.Context) {
+	userID := c.Param("user_id") // Assume user_id is passed as a URL parameter
+
+	// Call the function to get notifications
+	notifications, err := db.GetNotifications(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, notifications)
+}
+
+func GetReviewSubmissionsList(c *gin.Context) {
+	userID := c.Param("user_id")
+
+	notifications, err := db.GetReviewSubmissionsList(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, notifications)
+}

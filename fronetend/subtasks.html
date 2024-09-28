@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtasks - Proposal Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #002D72;
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: white !important;
+        }
+
+        .subtask-card {
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background-color: #0056b3;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #003d80;
+        }
+
+        .footer {
+            background-color: #002D72;
+            color: white;
+            padding: 10px 0;
+            width: 100%;
+            text-align: center;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="#">Proposal Management Portal</a>
+        <div class="ml-auto">
+            <a class="btn btn-outline-light" href="home.html">Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Subtasks for Proposal</h2>
+        <div class="row" id="subtask-list">
+            <!-- Subtasks will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Modal for Review Submissions -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">Submission List</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="submission-list">
+                    <!-- Submissions will be dynamically added here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Proposal Management Portal</p>
+    </footer>
+
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Include Bootstrap JavaScript -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const proposalID = urlParams.get('proposal_id');
+
+            // Log the proposal ID for debugging
+            console.log('Proposal ID:', proposalID);
+
+            // Check if proposalID is valid
+            if (!proposalID) {
+                alert('Invalid proposal ID');
+                return;
+            }
+
+            fetch(`http://localhost:8080/proposals/${proposalID}/subtasks`, {
+                method: 'GET'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const subtaskList = document.getElementById('subtask-list');
+                    subtaskList.innerHTML = '';
+
+                    // Directly handle the array returned from the API
+                    if (Array.isArray(data)) {
+                        data.forEach(subtask => {
+                            const col = document.createElement('div');
+                            col.className = 'col-md-4';
+                            col.innerHTML = `
+                    <div class="card subtask-card shadow">
+                        <div class="card-body">
+                            <h5 class="card-title">${subtask.topic_name}</h5>
+                            <p class="card-text">${subtask.description}</p>
+                            <p class="card-text"><strong>Skills Required:</strong> ${subtask.skills_required}</p>
+                            <p class="card-text"><strong>Submission Date:</strong> ${subtask.submission_date}</p>
+                            <p class="card-text"><strong>Status:</strong> ${subtask.status}</p>
+                            <button class="btn btn-primary btn-block" onclick="uploadFile(${subtask.id})">Upload File</button>
+                            <button class="btn btn-info btn-block mt-2" onclick="reviewSubmissions(${subtask.id})">Review Submissions</button>
+                        </div>
+                    </div>`;
+                            subtaskList.appendChild(col);
+                        });
+                    } else {
+                        throw new Error('Unexpected data format: Expected an array of subtasks.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to load subtasks: ' + error.message);
+                });
+        });
+
+        function uploadFile(subtaskId) {
+            let userId = sessionStorage.getItem('userId');
+
+            const form = document.createElement('form');
+            form.innerHTML = `
+            <label for="file-upload" class="form-label">Choose a file to upload:</label>
+            <input type="file" id="file-upload" name="file" class="form-control" required>
+            <button type="submit" class="btn btn-primary mt-2">Upload File</button>
+        `;
+
+            form.onsubmit = function (event) {
+                event.preventDefault();
+
+                const fileInput = document.getElementById('file-upload');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert('Please select a file to upload.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('subtask_id', subtaskId);
+                formData.append('user_id', userId);
+                formData.append('file_path', file);
+
+                fetch('http://localhost:8080/subtask/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok: ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert('File uploaded successfully!');
+                        console.log(data);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to upload file: ' + error.message);
+                    });
+            };
+
+            document.body.appendChild(form);
+        }
+
+        function reviewSubmissions(subtaskId) {
+            let userId = sessionStorage.getItem('userId');
+            fetch(`http://localhost:8080/review-submissions/${userId}`, {
+                method: 'GET'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const submissionList = document.getElementById('submission-list');
+                    submissionList.innerHTML = '';
+
+                    if (Array.isArray(data) && data.length > 0) {
+                        data.forEach(submission => {
+                            const div = document.createElement('div');
+                            div.className = 'submission-item';
+                            div.innerHTML = `
+                                <p><strong>Submitted by:</strong> ${submission.user_name} (${submission.user_id})</p>
+                                <p><strong>Subtask:</strong> ${submission.subtask_topic} (ID: ${submission.subtask_id})</p>
+                                <p><strong>Proposal:</strong> ${submission.proposal_title} (ID: ${submission.proposal_id})</p>
+                                <p><strong>File:</strong> <a href="${submission.file_path}" download>${submission.file_path.split('/').pop()}</a></p>
+                                <p><strong>Submission Date:</strong> ${submission.submission_date}</p>
+                                <p><strong>Status:</strong> ${submission.review_status}</p>
+                                <button class="btn btn-success" onclick="updateReviewStatus(${submission.submission_id}, 'approved')">Approve</button>
+                                <button class="btn btn-danger" onclick="updateReviewStatus(${submission.submission_id}, 'rejected')">Reject</button>
+                                <hr>
+                            `;
+                            submissionList.appendChild(div);
+                        });
+                    } else {
+                        submissionList.innerHTML = '<p>No submissions found OR you arent the Proposal Owner.</p>';
+                    }
+
+                    $('#reviewModal').modal('show');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to load submissions: ' + error.message);
+                });
+        }
+
+        function updateReviewStatus(submissionId, status) {
+            fetch(`http://localhost:8080/submissions/${submissionId}/review`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ review_status: status }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    alert('Submission ' + status + ' successfully!');
+                    location.reload(); // Refresh the submissions list
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to update review status: ' + error.message);
+                });
+        }
+    </script>
+
+</body>
+
+</html>

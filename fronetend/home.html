@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Proposal Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #002D72;
+        }
+
+        .navbar-brand, .navbar-nav .nav-link {
+            color: white !important;
+        }
+
+        .proposal-card {
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background-color: #0056b3;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #003d80;
+        }
+
+        .footer {
+            background-color: #002D72;
+            color: white;
+            padding: 10px 0;
+            width: 100%;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            right: 20px;
+            top: 60px;
+            width: 300px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .notification-dropdown.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="#">Proposal Management Portal</a>
+        <div class="navbar-nav">
+            <div class="notification-icon" style="position: relative; cursor: pointer;" onclick="toggleNotifications()">
+                <a class="nav-link" href="#" id="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge badge-danger" id="notification-count">0</span>
+                </a>
+                <div class="notification-dropdown" id="notification-dropdown">
+                    <div id="notification-list">
+                        <!-- Notifications will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ml-auto">
+            <a class="btn btn-outline-light" href="login.html">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Available Proposals</h2>
+        <div class="row" id="proposal-list">
+            <!-- Proposals will be dynamically added here -->
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Proposal Management Portal</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userId = sessionStorage.getItem('userId');
+            fetchProposals();
+            fetchNotifications(); // Fetch notifications on page load
+        });
+
+        function fetchProposals() {
+            fetch('http://localhost:8080/proposals', {
+                method: 'GET'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const proposalList = document.getElementById('proposal-list');
+                proposalList.innerHTML = '';
+
+                if (Array.isArray(data)) {
+                    data.forEach(proposal => {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-4';
+                        col.innerHTML = `
+                            <div class="card proposal-card shadow">
+                                <div class="card-body">
+                                    <h5 class="card-title">${proposal.title}</h5>
+                                    <p class="card-text">${proposal.description}</p>
+                                    <a href="subtasks.html?proposal_id=${proposal.id}" class="btn btn-primary btn-block">View Subtasks</a>
+                                </div>
+                            </div>`;
+                        proposalList.appendChild(col);
+                    });
+                } else {
+                    throw new Error('Unexpected data format');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load proposals: ' + error.message);
+            });
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notification-dropdown');
+            dropdown.classList.toggle('show');
+            if (dropdown.classList.contains('show')) {
+                fetchNotifications();
+            }
+        }
+
+        function fetchNotifications() {
+            let userId = sessionStorage.getItem('userId');
+            fetch(`http://localhost:8080/notifications?user_id=${userId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayNotifications(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to load notifications: ' + error.message);
+                });
+        }
+
+        function displayNotifications(notifications) {
+            const notificationList = document.getElementById('notification-list');
+            notificationList.innerHTML = '';
+
+            if (Array.isArray(notifications) && notifications.length > 0) {
+                notifications.forEach(notification => {
+                    const notificationItem = document.createElement('div');
+                    notificationItem.className = 'notification-item p-2 border-bottom';
+                    notificationItem.innerHTML = `
+                        <p>${notification}</p>
+                    `;
+                    notificationList.appendChild(notificationItem);
+                });
+                document.getElementById('notification-count').innerText = notifications.length;
+            } else {
+                notificationList.innerHTML = '<p class="text-center">No notifications.</p>';
+                document.getElementById('notification-count').innerText = '0';
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notification-dropdown');
+            if (!event.target.closest('.notification-icon')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+
+</body>
+</html>

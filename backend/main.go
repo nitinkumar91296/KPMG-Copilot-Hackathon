@@ -43,9 +43,14 @@ func main() {
 	r.POST("/subtask", handlers.CreateSubtaskHandler)
 	r.GET("/proposals/:proposal_id/subtasks", handlers.GetSubtasksHandler)
 	r.POST("/subtask/upload", handlers.UploadSubtaskHandler)
+
+	r.GET("/review-submissions/:user_id", handlers.GetReviewSubmissionsList)
 	r.GET("/submission/download/:submission_id", handlers.DownloadSubmissionFile)
 	r.POST("/subtask/review", handlers.ReviewSubtaskHandler)
 	r.GET("/coordinator/proposals/:userId", handlers.GetProposalsWithApprovedSubtasks)
+
+	// notifications
+	r.GET("/notifications", handlers.GetNotifications)
 
 	r.Run(":8080") // Start the server on port 8080
 }
