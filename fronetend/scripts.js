@@ -112,7 +112,7 @@ function fetchSubtasks(proposalID, title) {
     .then(response => response.json())
     .then(data => {
         const subtasksList = document.getElementById('subtasks-list');
-        subtasksList.innerHTML = ''; // Clear previous subtasks
+        subtasksList.innerHTML = ''; // Clear previous subtaskss
 
         data.forEach(subtask => {
             const div = document.createElement('div');
