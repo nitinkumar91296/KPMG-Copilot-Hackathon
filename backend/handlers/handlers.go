@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -171,6 +172,7 @@ func DownloadSubmissionFile(c *gin.Context) {
 	}
 
 	// Serve the file to the client
+	submission.FilePath = strings.TrimPrefix(submission.FilePath, "./")
 	c.File(submission.FilePath)
 }
 
@@ -220,12 +222,39 @@ func GetNotifications(c *gin.Context) {
 
 func GetReviewSubmissionsList(c *gin.Context) {
 	userID := c.Param("user_id")
+	subtaskID := c.Param("subtask_id")
 
-	notifications, err := db.GetReviewSubmissionsList(userID)
+	notifications, err := db.GetReviewSubmissionsList(userID, subtaskID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, notifications)
+}
+
+func ReviewSubmission(c *gin.Context) {
+	submissionIdStr := c.Param("submissionId")
+	submissionId, err := strconv.Atoi(submissionIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid submission ID"})
+		return
+	}
+
+	// Parse the review status from the request body
+	var requestBody struct {
+		ReviewStatus string `json:"review_status"`
+	}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	err = db.UpdateReviewStatus(submissionId, requestBody.ReviewStatus)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Review status updated successfully"})
 }

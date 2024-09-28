@@ -30,6 +30,9 @@ func main() {
 	// CORS middleware to avoid CORS errors
 	r.Use(cors.Default())
 
+	// Serve static files from the "uploads" directory
+	r.Static("/uploads", "D:/go-workspace/kpmg-hackathon/backend/uploads")
+
 	// API routes
 	// Auth Routes
 	r.POST("/signup", handlers.SignupHandler)
@@ -44,7 +47,8 @@ func main() {
 	r.GET("/proposals/:proposal_id/subtasks", handlers.GetSubtasksHandler)
 	r.POST("/subtask/upload", handlers.UploadSubtaskHandler)
 
-	r.GET("/review-submissions/:user_id", handlers.GetReviewSubmissionsList)
+	r.GET("/review-submissions/:user_id/:subtask_id", handlers.GetReviewSubmissionsList)
+	r.PUT("/submissions/:submissionId/update_review_status", handlers.ReviewSubmission)
 	r.GET("/submission/download/:submission_id", handlers.DownloadSubmissionFile)
 	r.POST("/subtask/review", handlers.ReviewSubtaskHandler)
 	r.GET("/coordinator/proposals/:userId", handlers.GetProposalsWithApprovedSubtasks)

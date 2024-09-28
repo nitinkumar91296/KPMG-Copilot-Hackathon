@@ -200,7 +200,7 @@
 
         function reviewSubmissions(subtaskId) {
             let userId = sessionStorage.getItem('userId');
-            fetch(`http://localhost:8080/review-submissions/${userId}`, {
+            fetch(`http://localhost:8080/review-submissions/${userId}/${subtaskId}`, {
                 method: 'GET'
             })
                 .then(response => {
@@ -215,13 +215,15 @@
 
                     if (Array.isArray(data) && data.length > 0) {
                         data.forEach(submission => {
+                            const fileUrl = `D:/go-workspace/kpmg-hackathon/backend/${submission.file_path}`;
                             const div = document.createElement('div');
+                            console.log(fileUrl);
                             div.className = 'submission-item';
                             div.innerHTML = `
                                 <p><strong>Submitted by:</strong> ${submission.user_name} (${submission.user_id})</p>
                                 <p><strong>Subtask:</strong> ${submission.subtask_topic} (ID: ${submission.subtask_id})</p>
                                 <p><strong>Proposal:</strong> ${submission.proposal_title} (ID: ${submission.proposal_id})</p>
-                                <p><strong>File:</strong> <a href="${submission.file_path}" download>${submission.file_path.split('/').pop()}</a></p>
+                                <p><strong>File:</strong> <a href="${fileUrl}" target="_blank">${submission.file_path.split('/').pop()}</a></p>
                                 <p><strong>Submission Date:</strong> ${submission.submission_date}</p>
                                 <p><strong>Status:</strong> ${submission.review_status}</p>
                                 <button class="btn btn-success" onclick="updateReviewStatus(${submission.submission_id}, 'approved')">Approve</button>
@@ -243,7 +245,7 @@
         }
 
         function updateReviewStatus(submissionId, status) {
-            fetch(`http://localhost:8080/submissions/${submissionId}/review`, {
+            fetch(`http://localhost:8080/submissions/${submissionId}/update_review_status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

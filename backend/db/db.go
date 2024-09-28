@@ -279,7 +279,7 @@ func GetNotifications(userID string) ([]string, error) {
 	return notifications, nil
 }
 
-func GetReviewSubmissionsList(userId string) ([]models.SubmissionDetails, error) {
+func GetReviewSubmissionsList(userId, subtaskId string) ([]models.SubmissionDetails, error) {
 	log.Print(userId)
 	query := `
         SELECT 
@@ -306,12 +306,12 @@ func GetReviewSubmissionsList(userId string) ([]models.SubmissionDetails, error)
 		JOIN 
 			users cu ON p.coordinator_id = cu.id
 		WHERE 
-			p.coordinator_id = ?
+			p.coordinator_id = ? AND s.subtask_id = ?
 		ORDER BY 
 			s.submission_date DESC;
     `
 
-	rows, err := db.Query(query, userId)
+	rows, err := db.Query(query, userId, subtaskId)
 	if err != nil {
 		return nil, err
 	}
@@ -339,4 +339,31 @@ func GetReviewSubmissionsList(userId string) ([]models.SubmissionDetails, error)
 		submissions = append(submissions, submission)
 	}
 	return submissions, nil
+}
+
+func UpdateReviewStatus(submissionId int, reviewStatus string) error {
+	// Update the review status for the specified submission
+	updateSubmissionQuery := `UPDATE submissions SET review_status = ? WHERE id = ?`
+	_, err := db.Exec(updateSubmissionQuery, reviewStatus, submissionId)
+	if err != nil {
+		return fmt.Errorf("failed to update submission review status: %v", err)
+	}
+
+	// If the review status is approved, update the subtask status to 'completed'
+	if reviewStatus == "approved" {
+		var subtaskId int
+		selectSubtaskQuery := `SELECT subtask_id FROM submissions WHERE id = ?`
+		err = db.QueryRow(selectSubtaskQuery, submissionId).Scan(&subtaskId)
+		if err != nil {
+			return fmt.Errorf("failed to get subtask id: %v", err)
+		}
+
+		updateSubtaskQuery := `UPDATE subtasks SET status = 'completed' WHERE id = ?`
+		_, err = db.Exec(updateSubtaskQuery, subtaskId)
+		if err != nil {
+			return fmt.Errorf("failed to update subtask status: %v", err)
+		}
+	}
+
+	return nil
 }
