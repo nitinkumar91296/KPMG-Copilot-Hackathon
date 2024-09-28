@@ -51,6 +51,7 @@
 <body>
 
     <nav class="navbar navbar-expand-lg">
+        <img src="D:/go-workspace/kpmg-hackathon/fronetend/images/kpmg-logo.jpeg" alt="KPMG Logo" style="height: 60px; margin-right: 10px;">
         <a class="navbar-brand" href="#">Proposal Management Portal</a>
         <div class="ml-auto">
             <a class="btn btn-outline-light" href="home.html">Back to Home</a>
@@ -65,7 +66,8 @@
     </div>
 
     <!-- Modal for Review Submissions -->
-    <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -133,8 +135,8 @@
                             <p class="card-text"><strong>Skills Required:</strong> ${subtask.skills_required}</p>
                             <p class="card-text"><strong>Submission Date:</strong> ${subtask.submission_date}</p>
                             <p class="card-text"><strong>Status:</strong> ${subtask.status}</p>
-                            <button class="btn btn-primary btn-block" onclick="uploadFile(${subtask.id})">Upload File</button>
-                            <button class="btn btn-info btn-block mt-2" onclick="reviewSubmissions(${subtask.id})">Review Submissions</button>
+                            <button class="btn btn-primary btn-block" ${subtask.status === 'completed' ? 'disabled' : ''}  onclick="uploadFile(${subtask.id})">Upload File</button>
+                            <button class="btn btn-info btn-block mt-2" ${subtask.status === 'completed' ? 'disabled' : ''} onclick="reviewSubmissions(${subtask.id})">Review Submissions</button>
                         </div>
                     </div>`;
                             subtaskList.appendChild(col);
