@@ -1,0 +1,360 @@
+{
+	"info": {
+		"_postman_id": "ac07e75b-2229-4456-9f70-287184be60bf",
+		"name": "KPMG Hackathon",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10334080"
+	},
+	"item": [
+		{
+			"name": "Sign Up",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n      \"name\": \"Pankaj Sharma\",\r\n      \"designation\": \"Consultant\",\r\n      \"experience\": 7,\r\n      \"skills\": \"DotNet, SQLServer, Azure, APIs\",\r\n      \"email\": \"pksharma@kpmg.com\",\r\n      \"password\": \"password123\"\r\n    }"
+				},
+				"url": {
+					"raw": "http://localhost:8080/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"pksharma@kpmg.com\",\r\n    \"password\": \"password123\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Proposal",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"New Web Application\",\r\n    \"description\": \"A web app project for hackathon\",\r\n    \"coordinator_id\": 1,\r\n    \"deadline\": \"2024-09-30\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/proposal",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"proposal"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Subtask",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"proposal_id\": 1,\r\n    \"topic_name\": \"Backend Development\",\r\n    \"description\": \"Develop the backend using Java, Python, and Mysql\",\r\n    \"skills_required\": \"Java, Python, Mysql\",\r\n    \"submission_date\": \"2024-09-29\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/subtask",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"subtask"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Submission",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "subtask_id",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "user_id",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "file_path",
+							"type": "file",
+							"src": "/D:/go-workspace/kpmg-hackathon/test-files/frontendtask.txt"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/subtask/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"subtask",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Review Submission",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"submission_id\": 3,\r\n    \"subtask_id\": 1,\r\n    \"reviewer_id\": 1,\r\n    \"review_status\": \"approved\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/subtask/review",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"subtask",
+						"review"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Proposals Report",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/coordinator/proposals/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"coordinator",
+						"proposals",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Download Subtask File",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/submission/download/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"submission",
+						"download",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "All Proposals",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/proposals",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"proposals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Subtasks per Proposal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/proposals/1/subtasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"proposals",
+						"1",
+						"subtasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Notifications",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/notifications?user_id=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"notifications"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List all submissions for Review",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/review-submissions/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"review-submissions",
+						"1"
+					]
+				},
+				"description": "Generated from cURL: curl -X GET \"http://localhost:8080/review-submissions/1\"\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Review Status",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"review_status\": \"approved\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/submissions/1/update_review_status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"submissions",
+						"1",
+						"update_review_status"
+					]
+				},
+				"description": "Generated from cURL: curl -X PUT \"http://localhost:8080/submissions/123/review\" \\\n-H \"Content-Type: application/json\" \\\n-d '{\n  \"review_status\": \"approved\"\n}'"
+			},
+			"response": []
+		}
+	]
+}
