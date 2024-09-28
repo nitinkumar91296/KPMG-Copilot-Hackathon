@@ -51,7 +51,7 @@
 <body>
 
     <nav class="navbar navbar-expand-lg">
-        <img src="D:/go-workspace/kpmg-hackathon/fronetend/images/kpmg-logo.jpeg" alt="KPMG Logo" style="height: 60px; margin-right: 10px;">
+        <img src="D:/go-workspace/kpmg-hackathon/frontend/images/kpmg-logo.jpeg" alt="KPMG Logo" style="height: 60px; margin-right: 10px;">
         <a class="navbar-brand" href="#">Proposal Management Portal</a>
         <div class="ml-auto">
             <a class="btn btn-outline-light" href="home.html">Back to Home</a>
@@ -60,6 +60,7 @@
 
     <div class="container mt-4">
         <h2 class="text-center mb-4">Subtasks for Proposal</h2>
+        <button class="btn btn-success mb-4" onclick="openSubtaskForm()">Add Subtask</button>
         <div class="row" id="subtask-list">
             <!-- Subtasks will be dynamically added here -->
         </div>
@@ -85,6 +86,46 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal for Adding Subtask -->
+    <div class="modal fade" id="subtaskModal" tabindex="-1" role="dialog" aria-labelledby="subtaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="subtaskModalLabel">Add New Subtask</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="subtaskForm">
+                        <div class="form-group">
+                            <label for="topic_name">Topic Name</label>
+                            <input type="text" class="form-control" id="topic_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea class="form-control" id="description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="skills_required">Skills Required</label>
+                            <textarea class="form-control" id="skills_required" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="submission_date">Submission Date</label>
+                            <input type="date" class="form-control" id="submission_date" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Subtask</button>
+                    </form>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
 
     <footer class="footer">
         <p>&copy; 2024 Proposal Management Portal</p>
@@ -266,6 +307,50 @@
                     alert('Failed to update review status: ' + error.message);
                 });
         }
+
+        function openSubtaskForm() {
+            $('#subtaskModal').modal('show');
+        }
+
+        document.getElementById('subtaskForm').onsubmit = function (event) {
+            event.preventDefault();
+
+            const proposalID = parseInt(new URLSearchParams(window.location.search).get('proposal_id'), 10);
+            const topicName = document.getElementById('topic_name').value;
+            const description = document.getElementById('description').value;
+            const skillsRequired = document.getElementById('skills_required').value;
+            const submissionDate = document.getElementById('submission_date').value;
+
+            const newSubtask = {
+                proposal_id: proposalID,
+                topic_name: topicName,
+                description: description,
+                skills_required: skillsRequired,
+                submission_date: submissionDate,
+            };
+
+            console.log(newSubtask)
+
+            fetch('http://localhost:8080/subtask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newSubtask),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    alert('Subtask created successfully!');
+                    $('#subtaskModal').modal('hide'); // Hide the modal
+                    location.reload(); // Refresh the page to show the new subtask
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to create subtask: ' + error.message);
+                });
+        };
     </script>
 
 </body>

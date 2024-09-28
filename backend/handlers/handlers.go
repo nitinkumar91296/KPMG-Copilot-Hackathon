@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"kpmg-hackathon/db"
 	"kpmg-hackathon/models"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -50,11 +51,13 @@ func LoginHandler(c *gin.Context) {
 func CreateProposalHandler(c *gin.Context) {
 	var proposal models.Proposal
 	if err := c.ShouldBindJSON(&proposal); err != nil {
+		log.Printf("error binding: %v", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := db.CreateProposal(proposal); err != nil {
+		log.Printf("error creating proposal: %v", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create proposal: %v", err.Error())})
 		return
 	}
@@ -76,11 +79,13 @@ func GetProposalsHandler(c *gin.Context) {
 func CreateSubtaskHandler(c *gin.Context) {
 	var subtask models.Subtask
 	if err := c.ShouldBindJSON(&subtask); err != nil {
+		log.Printf("error binding: %v", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := db.CreateSubtask(subtask); err != nil {
+		log.Printf("error creating subtask: %v", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create subtask: %v", err.Error())})
 		return
 	}
